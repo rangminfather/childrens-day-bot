@@ -1,0 +1,37 @@
+name: Childrens Day Idea Collector
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every 2 days at 00:15 UTC = 09:15 KST
+    - cron: '15 0 */2 * *'
+
+jobs:
+  run-collector:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run collector
+        env:
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-4.1-mini
+          SMTP_HOST: smtp.naver.com
+          SMTP_PORT: '587'
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+        run: python collector.py
